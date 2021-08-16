@@ -9,14 +9,14 @@ import './App.css';
 class App extends Component {
     showContent = (routes) => {
         var result = null;
-        if(routes.length > 0) {
+        if (routes.length > 0) {
             result = routes.map((route, index) => {
-                return <Route 
-                            path={route.path} 
-                            exact={route.exact} 
-                            component={route.main} 
-                            key={index}
-                        />
+                return <Route
+                    path={route.path}
+                    exact={route.exact}
+                    component={route.main}
+                    key={index}
+                />
             })
         }
         return result;
@@ -25,19 +25,16 @@ class App extends Component {
     render() {
         return (
             <Router>
-                <div>
+                <React.Fragment>
                     <Menu />
 
                     <div className="container">
                         <div className="row">
-                        <Switch>{this.showContent(routes)}</Switch>
-                            
+                            <Switch>{this.showContent(routes)}</Switch>
+
                         </div>
                     </div>
-
-
-
-                </div>
+                </React.Fragment>
             </Router>
         )
     }

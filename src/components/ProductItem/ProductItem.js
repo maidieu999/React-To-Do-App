@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 class ProductItem extends Component {
     onDelete = (productId) => {
         if(confirm('Ban chac chan muon xoa san pham nay?')) { //eslint-disable-line
-            this.props.onDelete(productId)
+            this.props.onDeleteItem(productId)
         }
     }
     render() {
@@ -31,6 +31,6 @@ class ProductItem extends Component {
             </tr>
         )
     }
-}
+} 
 
 export default ProductItem;

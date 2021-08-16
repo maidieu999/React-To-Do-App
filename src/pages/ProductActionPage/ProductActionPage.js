@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import callAPI from '../../utils/apiCaller';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { actAddProductRequest, actGetEditProductRequest, actUpdateProductRequest } from '../../actions/index';
 
 class ProductActionPage extends Component {
     constructor(props) {
@@ -15,18 +16,37 @@ class ProductActionPage extends Component {
 
     componentDidMount() {
         var { match } = this.props;
-        if(match) {
+        if (match) {
             var id = match.params.id;
+            if (id) {
+                this.props.onGetEditProduct(id);
+            }
         }
-        callAPI(`products/${id}`, 'GET', null)
-            .then(res => {
-                this.setState({
-                    id: res.data.id,
-                    txtName: res.data.name,
-                    txtPrice: res.data.price,
-                    chkbStaus: res.data.status
-                })
-            })
+
+    }
+
+    // static getDerivedStateFromProps(nextProps, prevState) {
+
+    //     if(nextProps.itemEditing!==prevState.itemEditing) {
+    //         return {
+    //             id: nextProps.itemEditing.id,
+    //             txtName: nextProps.itemEditing.name,
+    //             txtPrice: nextProps.itemEditing.price,
+    //             chkbStaus: nextProps.itemEditing.status
+    //         }
+    //     }
+    //     else return null;
+    // }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.itemEditing !== this.props.itemEditing) {
+            this.setState({
+                id: this.props.itemEditing.id,
+                txtName: this.props.itemEditing.name,
+                txtPrice: this.props.itemEditing.price,
+                chkbStaus: this.props.itemEditing.status
+            });
+        }
     }
 
     onChange = (e) => {
@@ -34,42 +54,38 @@ class ProductActionPage extends Component {
         var name = target.name;
         var value = target.type === 'checkbox' ? target.checked : target.value;
         this.setState({
-            [name] : value
+            [name]: value
         })
 
     }
+    //khi lick vào button save
     onSave = (e) => {
         e.preventDefault();
-        var { txtName, txtPrice, chkbStaus } = this.state;
+        var { txtName, txtPrice, chkbStaus, id } = this.state;
+        var product = {
+            id: id,
+            name: txtName,
+            price: txtPrice,
+            status: chkbStaus
+        }
         var { history } = this.props;
-        if(this.state.id) {
-            callAPI(`products/${this.state.id}`, 'PUT', {
-                name: txtName,
-                price: txtPrice,
-                status: chkbStaus
-            }).then(res => {
-                history.goBack();
-            })
+        //edit
+        if (this.state.id) {
+            this.props.onUpdateProduct(product);
         }
-        else{
-            callAPI('products', 'post', {
-                name: txtName,
-                price: txtPrice,
-                status: chkbStaus
-            })
-                .then(res => {
-                    //sau khi thêm thành công chuyển về trang xem danh sách sản phẩm
-                    history.goBack();
-    
-                })
+        //add
+        else {
+            this.props.onAddProduct(product);
         }
-        
+        //Trở về trang xem danh sách sản phẩm
+        history.goBack();
+
     }
     render() {
         var { txtName, txtPrice, chkbStaus } = this.state;
         return (
             <div className="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                <form onSubmit={ this.onSave }>
+                <form onSubmit={this.onSave}>
                     <div className="form-group">
                         <label htmlFor="name">Name: </label>
                         <input
@@ -110,7 +126,7 @@ class ProductActionPage extends Component {
                     </div>
                     <Link to='/product-list' className="btn btn-info mr-10">Go Back Product List Page</Link>
                     <button type="submit" className="btn btn-primary">Save</button>
-                    
+
                 </form>
             </div>
 
@@ -118,5 +134,23 @@ class ProductActionPage extends Component {
     }
 
 }
+const mapStateToProps = (state) => {
+    return {
+        itemEditing: state.itemEditing
+    }
+}
+const mapDispatchToProps = (dispatch, props) => {
+    return {
+        onAddProduct: (product) => {
+            dispatch(actAddProductRequest(product))
+        },
+        onGetEditProduct: (id) => {
+            dispatch(actGetEditProductRequest(id))
+        },
+        onUpdateProduct: (product) => {
+            dispatch(actUpdateProductRequest(product))
+        }
+    }
+}
 
-export default ProductActionPage;
+export default connect(mapStateToProps, mapDispatchToProps)(ProductActionPage)
